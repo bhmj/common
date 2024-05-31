@@ -1,0 +1,28 @@
+name: 'Setup Go environment'
+inputs:
+  github_app_id:
+    description: "Github app id"
+  github_app_installation_id:
+    description: "Github app installation id"
+  github_app_private_key:
+    description: "Github app private key"
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: 'go.mod'
+    - name: Get GitHub Access Token
+      uses: workato-devops/github-actions/github-token@v1
+      id: github_token
+      env:
+        GITHUB_APP_PRIVATE_KEY: ${{ inputs.github_app_private_key }}
+        GITHUB_APP_ID: ${{ inputs.github_app_id }}
+        GITHUB_APP_INSTALLATION_ID: ${{ inputs.github_app_installation_id }}
+    - name: Set git config
+      shell: bash
+      run: |
+        git config --global url."https://oauth:${{ steps.github_token.outputs.token }}@github.com/".insteadOf "https://github.com/"
